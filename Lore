@@ -1,0 +1,260 @@
+local R,P,RS,D,UIS=game:GetService("ReplicatedStorage"),game:GetService("Players"),game:GetService("RunService"),game:GetService("Debris"),game:GetService("UserInputService")
+local LP,PC,W=P.LocalPlayer,P.LocalPlayer.Character or P.LocalPlayer.CharacterAdded:Wait(),game:GetService("Workspace")
+local GE,CE,MT,ChE=R:FindFirstChild("GrabEvents"),R:FindFirstChild("CreatureEvents"),R:WaitForChild("MenuToys"),R:FindFirstChild("CharacterEvents")
+local toss,endGrab,SetNO,Struggle=CE and CE:FindFirstChild("CreatureToss"),GE and GE:FindFirstChild("EndGrabEarly"),GE and GE:FindFirstChild("SetNetworkOwner"),ChE and ChE:FindFirstChild("Struggle")
+local StartGrab=GE and GE:FindFirstChild("StartGrab")
+local OrionLib=loadstring(game:HttpGet("https://raw.githubusercontent.com/jadpy/suki/refs/heads/main/orion"))()
+local pHParts,burnP,GBC,DC,FGC,AC,LMC,lastPos,NR,GI,bA={},nil,nil,nil,nil,nil,nil,PC.HumanoidRootPart.CFrame,25,0.0000001,1
+local CustomSpeed,CustomJump=400,200
+local TeleportTargetName,TPKillC=nil,nil
+local function iD(d,a) while d and d~=a and d.Parent do d=d.Parent end return d==a end
+local function fAB() for _,v in pairs(W:GetDescendants()) do if v.Name=="CreatureBlobman" and v:FindFirstChild("VehicleSeat") and v.VehicleSeat:FindFirstChild("SeatWeld") and LP.Character and iD(v.VehicleSeat.SeatWeld.Part1,LP.Character) then return v end end end
+local function bGP(p,b) if not p or not p.Character or not b then return end local tHRP=p.Character:FindFirstChild("HumanoidRootPart") if not tHRP then return end local gP=bA==1 and b:FindFirstChild("LeftDetector") or b:FindFirstChild("RightDetector") local wP=gP and gP:FindFirstChild(bA==1 and "LeftWeld" or "RightWeld") bA=bA==1 and 2 or 1 if gP and wP and b:FindFirstChild("BlobmanSeatAndOwnerScript") then local gE=b.BlobmanSeatAndOwnerScript:FindFirstChild("CreatureGrab") if gE then pcall(function() gE:FireServer(gP,tHRP,wP) end) end end end
+local function sI(iN,p,r) task.spawn(function() R.MenuToys.SpawnToyRemoteFunction:InvokeServer(iN,CFrame.new(p),r) end) end
+local function gGTP() local gPs=W:FindFirstChild("GrabParts") if gPs and gPs.GrabPart and gPs.GrabPart:FindFirstChild("WeldConstraint") then return gPs.GrabPart.WeldConstraint.Part1 end end
+local function fIP(mN,pN) for _,item in ipairs(W:GetChildren()) do if item.Name==mN then return item:FindFirstChild(pN) or item end end return nil end
+local function sGE(eT,e) if GBC then GBC:Disconnect() end if not e then GBC=nil;return end GBC=RS.Heartbeat:Connect(function() local tP=gGTP() if not tP or not tP.Parent or not tP.Parent:FindFirstChildOfClass("Humanoid") then return end if eT=="fire" then sI("Campfire",Vector3.new(0,-500,0),Vector3.new(0,0,0)) local firePart=fIP("Campfire","FirePlayerPart") if firePart then task.wait(0.01) SetNO:FireServer(firePart,firePart.CFrame) firePart.CFrame=tP.CFrame D:AddItem(firePart,0.1) end elseif eT=="blow" then if SetNO then SetNO:FireServer(tP,tP.CFrame) end local vO=Instance.new("BodyVelocity") vO.MaxForce=Vector3.new(math.huge,math.huge,math.huge) vO.Velocity=Vector3.new(0,1000,0) vO.Parent=tP D:AddItem(vO,0.1) elseif eT=="poison" then sI("PoisonBottle",Vector3.new(0,-500,0),Vector3.new(0,0,0)) local poisonPart=fIP("PoisonBottle","PoisonPart") if poisonPart then task.wait(0.01) SetNO:FireServer(poisonPart,poisonPart.CFrame) poisonPart.CFrame=tP.CFrame D:AddItem(poisonPart,0.1) end elseif eT=="noclip" then if SetNO then SetNO:FireServer(tP,tP.CFrame) end local c=tP.Parent for _,p in pairs(c:GetChildren()) do if p:IsA("BasePart") then p.CanCollide=false end end tP.CFrame=tP.CFrame*CFrame.new(0,-5,0) end end) end
+local function sD(e) if not e then if DC then coroutine.close(DC);DC=nil end local c=LP.Character if c then for _,p in pairs(c:GetChildren()) do if p:IsA("BasePart") then p.Anchored=false end end return end end if DC then coroutine.close(DC) end DC=coroutine.create(function() while true do pcall(function() local c=LP.Character if not c or not c:FindFirstChild("HumanoidRootPart") then return end if iH or iR or c.Humanoid.Health<=0 then if Struggle then Struggle:FireServer() end end if (h.Position-lastPos.Position).Magnitude>50 and not iH and not iR and c.Humanoid.MoveDirection.Magnitude==0 then h.CFrame=lastPos end lastPos=h.CFrame if not iH and not iR then for _,p in pairs(c:GetChildren()) do if p:IsA("BasePart") then p.Anchored=false end end end end) task.wait(0.01) end end) coroutine.resume(DC) end
+local function sN(e) local c=LP.Character if c then for _,p in pairs(c:GetChildren()) do if p:IsA("BasePart") then p.CanCollide=not e end end end end
+local function sMS(e) local Humanoid=LP.Character and LP.Character:FindFirstChild("Humanoid") if not Humanoid then return end if not e then if LMC then LMC:Disconnect() end LMC=nil Humanoid.WalkSpeed=16 return end if LMC then LMC:Disconnect() end Humanoid.WalkSpeed=0 LMC=RS.Heartbeat:Connect(function(dt) local H=LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") if H and Humanoid then if Humanoid.WalkSpeed~=0 then Humanoid.WalkSpeed=0 end local MoveDir=Humanoid.MoveDirection if MoveDir.Magnitude>0 then H.CFrame=H.CFrame+MoveDir*(CustomSpeed*dt) end local Jump=UIS:IsKeyDown(Enum.KeyCode.Space) if Jump then H.AssemblyLinearVelocity=H.AssemblyLinearVelocity+Vector3.new(0,CustomJump*0.5,0) end end end) end
+local function sA(e) if not e then if AC then coroutine.close(AC);AC=nil end return end if AC then coroutine.close(AC) end AC=coroutine.create(function() while true do local H=LP.Character and LP.Character.HumanoidRootPart if H then for _,p in ipairs(P:GetChildren()) do if p~=LP and p.Character then local tH=p.Character:FindFirstChild("HumanoidRootPart") if tH and (tH.Position-H.Position).Magnitude<25 then if SetNO then SetNO:FireServer(tH,tH.CFrame) end local vO=Instance.new("BodyVelocity") vO.MaxForce=Vector3.new(math.huge,math.huge,math.huge) vO.Velocity=(tH.Position-H.Position).Unit*500+Vector3.new(0,200,0) vO.Parent=tH D:AddItem(vO,0.1) end end end end task.wait(0.1) end end) coroutine.resume(AC) end
+local function sFG(gT,e) if not e then if FGC then coroutine.close(FGC);FGC=nil end return end if FGC then coroutine.close(FGC) end local bM=fAB() if not bM then OrionLib:Notify({Title="❌ ERROR",Content="ブロングマンに乗車していません。乗車してからONにしてください。",Duration=3}) return false end OrionLib:Notify({Title="✅ 起動",Content=string.format("巨人キック (%sモード, GI=%.7f秒) を開始しました。",gT=="nearby" and "近距離" or "全体",GI),Duration=3}) FGC=coroutine.create(function() while true do local targets={} local H=LP.Character and LP.Character.HumanoidRootPart for _,p in ipairs(P:GetChildren()) do if p~=LP and p.Character then local tH=p.Character:FindFirstChild("HumanoidRootPart") if tH then local d=(tH.Position-H.Position).Magnitude if gT=="nearby" and d<NR then table.insert(targets,p) elseif gT=="world" then table.insert(targets,p) end end end end for _,p in ipairs(targets) do coroutine.wrap(function() bGP(p,bM) end)() end if toss then pcall(function() toss:FireServer() end) end if endGrab then pcall(function() endGrab:FireServer() end) end task.wait(GI) end end) coroutine.resume(FGC) return true end
+local function getPlayerNames() local names={} for _,p in ipairs(P:GetPlayers()) do if p~=LP then table.insert(names,p.DisplayName.." ("..p.Name..")") end end return names end
+local function sTPKill(e) if not e then if TPKillC then coroutine.close(TPKillC);TPKillC=nil end return end if not TeleportTargetName or TeleportTargetName=="Select Target" then OrionLib:Notify({Title="❌ ERROR",Content="ターゲットが選択されていません。",Duration=3}) return false end local name=TeleportTargetName:gsub(" %(.+%)","") local tP=P:FindFirstChild(name) or P:FindFirstChild(TeleportTargetName:match("%((.+)%)")) if not tP or not tP.Character then OrionLib:Notify({Title="❌ ERROR",Content="ターゲットが見つかりません。",Duration=3}) return false end if TPKillC then coroutine.close(TPKillC) end TPKillC=coroutine.create(function() while true do pcall(function() local tH=tP.Character:FindFirstChild("HumanoidRootPart") local pH=LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") if tH and pH then local originalCFrame=pH.CFrame pH.CFrame=CFrame.new(tH.Position+Vector3.new(0,-4,0)) task.wait(0.1) if SetNO then SetNO:FireServer(tH,tH.CFrame) end local vO=Instance.new("BodyVelocity") vO.MaxForce=Vector3.new(math.huge,math.huge,math.huge) vO.Velocity=Vector3.new(0,100000,0) vO.Parent=tH D:AddItem(vO,0.05) task.wait(0.5) pH.CFrame=originalCFrame end end) task.wait(2) end end) coroutine.resume(TPKillC) end
+local Window=OrionLib:MakeWindow({Name="メスガキHUB",HidePremium=true,SaveConfig=false})
+local GT=Window:MakeTab({Name="クラブ",Icon="rbxassetid://10723404472"})
+GT:AddSection({Name="掴み悪用"})
+GT:AddToggle({Name="1. 掴んだ相手を燃やす",Default=false,Callback=function(e)sGE("fire",e)end})
+GT:AddToggle({Name="2. 掴んだ相手を吹き飛ばす",Default=false,Callback=function(e)sGE("blow",e)end})
+GT:AddToggle({Name="3. 掴んだ相手を毒状態にする",Default=false,Callback=function(e)sGE("poison",e)end})
+GT:AddToggle({Name="4. 掴んだ相手をNOClipにしてめり込ませる",Default=false,Callback=function(e)sGE("noclip",e)end})
+local DT=Window:MakeTab({Name="防御",Icon="rbxassetid://10734951847"})
+DT:AddSection({Name="絶対防御"})
+DT:AddToggle({Name="Anti-grab",Default=false,Callback=sD})
+local PT=Window:MakeTab({Name="プレイヤー",Icon="rbxassetid://10747373176"})
+PT:AddSection({Name="移動制御"})
+PT:AddSlider({Name="1. 移動速度",Min=10,Max=1000,Default=CustomSpeed,Increment=10,Callback=function(v) CustomSpeed=v end})
+PT:AddToggle({Name="2. 移動速度ON",Default=false,Callback=function(e)sMS(e)end})
+PT:AddSlider({Name="3. ジャンプ力",Min=10,Max=1000,Default=CustomJump,Increment=10,Callback=function(v) CustomJump=v end})
+PT:AddToggle({Name="4. カスタムジャンプ力ON",Default=false,Callback=function(e)sMS(e)end})
+PT:AddToggle({Name="5. NOClip ON/OFF",Default=false,Callback=sN})
+local AT=Window:MakeTab({Name="オーラ",Icon="rbxassetid://10709782230"})
+AT:AddSection({Name="範囲効果"})
+AT:AddToggle({Name="1. 近くのプレイヤーを吹き飛ばすオーラ",Default=false,Callback=sA})
+local TiT=Window:MakeTab({Name="巨人キック",Icon="rbxassetid://10709782230"})
+TiT:AddSection({Name="BLOBMANサーバー破壊キック"})
+TiT:AddToggle({Name=string.format("1. ON/OFF: 近くのプレイヤー強制掴み連打 (%.7f秒)",GI),Default=false,Callback=function(e)sFG("nearby",e)end})
+TiT:AddToggle({Name=string.format("2. ON/OFF: ワールド全体強制掴み連打 (%.7f秒)",GI),Default=false,Callback=function(e)sFG("world",e)end})
+local TPT=Window:MakeTab({Name="テレポート攻撃",Icon="rbxassetid://10709782230"})
+TPT:AddSection({Name="対象プレイヤー悪用"})
+TPT:AddDropdown({Name="1. ターゲットプレイヤー選択",Options=getPlayerNames(),Default="Select Target",Callback=function(v) TeleportTargetName=v if TPKillC and coroutine.status(TPKillC)~="dead" then coroutine.close(TPKillC) end end})
+TPT:AddToggle({Name="2. ターゲット位置テレポート&キル",Default=false,Callback=sTPKill})
+
+-- クラブ系(飛ばす・スピン・テレキネシス・軌道)タブ
+local GrabTab = Window:MakeTab({Name = "クラブ系(飛ばすとか)", Icon = "rbxassetid://4483345998"})
+
+local ThrowPower = 400
+local SpinPower = 10
+local TelekinesisDistance = 10
+local OrbitSpeed = 50
+local OrbitRadius = 10
+local OrbitHeight = 3
+
+local activeFreezes = {}
+local activeSpin = {}
+local activeTelekinesis = {}
+local activeOrbits = {}
+local connections = {}
+
+local function cleanupEffects(tbl)
+    for part,effects in pairs(tbl) do
+        if effects then
+            for _,effect in pairs(effects) do
+                pcall(function()
+                    if effect and effect.Parent then
+                        effect:Destroy()
+                    end
+                end)
+            end
+        end
+    end
+    table.clear(tbl)
+end
+
+local function resetPartEffects(tbl)
+    for part,effects in pairs(tbl) do
+        if part and part.Parent then
+            for _,effect in pairs(effects) do
+                if effect:IsA("BodyVelocity") then
+                    effect.Velocity = Vector3.zero
+                elseif effect:IsA("BodyAngularVelocity") then
+                    effect.AngularVelocity = Vector3.zero
+                elseif effect:IsA("BodyGyro") then
+                    effect.CFrame = part.CFrame
+                end
+                effect:Destroy()
+            end
+        end
+    end
+    table.clear(tbl)
+end
+
+local function disconnectConnection(name)
+    if connections[name] then
+        connections[name]:Disconnect()
+        connections[name] = nil
+    end
+end
+
+local function disableAllGrabEffects()
+    resetPartEffects(activeFreezes)
+    resetPartEffects(activeSpin)
+    resetPartEffects(activeTelekinesis)
+    for part, data in pairs(activeOrbits) do
+        if data[2] then data[2]:Disconnect() end
+        if data[1] then data[1]:Destroy() end
+    end
+    activeOrbits = {}
+    for name,_ in pairs(connections) do
+        disconnectConnection(name)
+    end
+end
+
+GrabTab:AddSection({Name = "投げる"})
+GrabTab:AddToggle({
+    Name="投げる強さ",
+    Default=false,
+    Flag="throwToggle",
+    Save=true,
+    Callback=function(enabled)
+        if not enabled then
+            disableAllGrabEffects()
+            return
+        end
+        disconnectConnection("throw")
+        connections["throw"] = Workspace.ChildAdded:Connect(function(model)
+            if model.Name ~= "GrabParts" then return end
+            local grabPart = model:FindFirstChild("GrabPart")
+            local weld = grabPart and grabPart:FindFirstChild("WeldConstraint")
+            if not weld or not weld.Part1 then return end
+            local velocityObj = Instance.new("BodyVelocity")
+            velocityObj.Parent = weld.Part1
+            velocityObj.MaxForce = Vector3.zero
+            model:GetPropertyChangedSignal("Parent"):Connect(function()
+                if not model.Parent then
+                    local lastInput = UserInputService:GetLastInputType()
+                    if lastInput == Enum.UserInputType.MouseButton2 or lastInput == Enum.UserInputType.Touch then
+                        velocityObj.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+                        velocityObj.Velocity = Workspace.CurrentCamera.CFrame.LookVector * ThrowPower
+                        Debris:AddItem(velocityObj,1)
+                    else
+                        velocityObj:Destroy()
+                    end
+                end
+            end)
+        end)
+    end
+})
+GrabTab:AddSlider({
+    Name="投げる強さ",
+    Min=300,
+    Max=10000,
+    Default=400,
+    Increment=1,
+    Flag="throwSlider",
+    Save=true,
+    Callback=function(value)
+        ThrowPower = value
+    end
+})
+
+GrabTab:AddSection({Name = "固定グラブ"})
+GrabTab:AddToggle({
+    Name="固定グラブ",
+    Default=false,
+    Flag="freezeToggle",
+    Save=true,
+    Callback=function(enabled)
+        if not enabled then
+            disableAllGrabEffects()
+            return
+        end
+        disconnectConnection("freeze")
+        resetPartEffects(activeFreezes)
+        connections["freeze"] = Workspace.ChildAdded:Connect(function(model)
+            if model.Name ~= "GrabParts" then return end
+            local grabPart = model:FindFirstChild("GrabPart")
+            local weld = grabPart and grabPart:FindFirstChild("WeldConstraint")
+            if not weld then return end
+            model:GetPropertyChangedSignal("Parent"):Connect(function()
+                if model.Parent ~= nil then return end
+                local partToFreeze = weld.Part1
+                if not partToFreeze or partToFreeze.Anchored then return end
+                if activeFreezes[partToFreeze] then
+                    resetPartEffects({[partToFreeze]=activeFreezes[partToFreeze]})
+                else
+                    local bv = Instance.new("BodyVelocity")
+                    bv.Velocity = Vector3.zero
+                    bv.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+                    bv.Parent = partToFreeze
+                    local bg = Instance.new("BodyGyro")
+                    bg.CFrame = partToFreeze.CFrame
+                    bg.MaxTorque = Vector3.new(math.huge,math.huge,math.huge)
+                    bg.Parent = partToFreeze
+                    activeFreezes[partToFreeze] = {bv,bg}
+                end
+            end)
+        end)
+    end
+})
+GrabTab:AddButton({
+    Name="固定したパーツを全て解除",
+    Callback=function()
+        resetPartEffects(activeFreezes)
+    end
+})
+
+-- スピングラブ
+GrabTab:AddSection({Name = "スピングラブ"})
+GrabTab:AddToggle({
+    Name="スピングラブ",
+    Default=false,
+    Flag="SpinToggle",
+    Save=true,
+    Callback=function(enabled)
+        if not enabled then
+            disableAllGrabEffects()
+            return
+        end
+        disconnectConnection("spin")
+        resetPartEffects(activeSpin)
+        connections["spin"] = Workspace.ChildAdded:Connect(function(model)
+            if model.Name ~= "GrabParts" then return end
+            local grabPart = model:FindFirstChild("GrabPart")
+            local weld = grabPart and grabPart:FindFirstChild("WeldConstraint")
+            if not weld then return end
+            weld:GetPropertyChangedSignal("Parent"):Connect(function()
+                if weld.Parent == nil and weld.Part1 and not weld.Part1.Anchored then
+                    local bav = Instance.new("BodyAngularVelocity")
+                    bav.AngularVelocity = Vector3.new(0,SpinPower,0)
+                    bav.MaxTorque = Vector3.new(math.huge,math.huge,math.huge)
+                    bav.P = 10000
+                    bav.Parent = weld.Part1
+                    activeSpin[weld.Part1] = {bav}
+                end
+            end)
+        end)
+    end
+})
+GrabTab:AddSlider({
+    Name="スピン強さ",
+    Min=5,
+    Max=50,
+    Default=10,
+    Increment=1,
+    Flag="SpinSlider",
+    Save=true,
+    Callback=function(value)
+        SpinPower = value
+    end
+})
